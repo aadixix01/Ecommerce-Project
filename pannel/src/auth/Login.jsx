@@ -1,10 +1,48 @@
 import React, { useState } from "react";
 import { auth } from "../servies/image.services";
 import { FaEyeSlash, FaRegEye } from "react-icons/fa";
+import { register } from "../servies/auth.services";
+import toast from "react-hot-toast";
 
 const AuthPage = () => {
   const [eye, setEye] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [registerdata, setRegister] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async (e) => {
+    try {
+      e.preventDefault();
+      setLoading(true);
+      const payload = {
+        name: registerdata?.name,
+        email: registerdata?.email,
+        phone: registerdata?.phone,
+        password: registerdata?.password,
+      };
+      const res = await register(payload);
+      console.log("res", res);
+      if (res?.success) {
+        toast.success(res?.message);
+        setLoading(false);
+        setRegister({
+          name: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log("error", error);
+      toast.error(error?.errors || error?.message || "Internal server down");
+    }
+  };
 
   return (
     <div className="min-h-screen grid xl:grid-cols-[55%_1fr] lg:grid-cols-[50%_1fr] bg-white">
@@ -77,6 +115,10 @@ const AuthPage = () => {
                       className="text-blue-600 font-semibold cursor-pointer"
                     >
                       Sign up here
+                    </span>{" "}
+                    <span>/</span>{" "}
+                    <span className="text-blue-600 font-semibold cursor-pointer">
+                      Verify account
                     </span>
                   </p>
                 </div>
@@ -102,7 +144,7 @@ const AuthPage = () => {
                   Sign up to get started and manage your projects easily.
                 </p>
               </div>
-              <form className="space-y-4">
+              <form onSubmit={handleRegister} className="space-y-4">
                 <div className="relative py-2">
                   <label
                     className="absolute -top-1 left-2 text-[18px] bg-white px-4"
@@ -112,6 +154,10 @@ const AuthPage = () => {
                   </label>
                   <input
                     type="text"
+                    value={registerdata.name}
+                    onChange={(e) =>
+                      setRegister({ ...registerdata, name: e.target.value })
+                    }
                     className="w-full border outline-none py-3 px-4 rounded-[8px] focus:border focus:border-blue-600 text-[18px]"
                   />
                 </div>
@@ -123,10 +169,34 @@ const AuthPage = () => {
                     Email
                   </label>
                   <input
-                    type="text"
+                    type="email"
+                    value={registerdata.email}
+                    onChange={(e) =>
+                      setRegister({ ...registerdata, email: e.target.value })
+                    }
                     className="w-full border outline-none py-3 px-4 rounded-[8px] focus:border focus:border-blue-600 text-[18px]"
                   />
                 </div>
+                <div className="relative py-2">
+                  <label
+                    className="absolute -top-1 left-2 text-[18px] bg-white px-4"
+                    htmlFor="phone"
+                  >
+                    Phone
+                  </label>
+
+                  <input
+                    type="text"
+                    value={registerdata.phone}
+                    maxLength={10}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      setRegister({ ...registerdata, phone: value });
+                    }}
+                    className="w-full border outline-none py-3 px-4 rounded-[8px] focus:border focus:border-blue-600 text-[18px]"
+                  />
+                </div>
+
                 <div className="relative py-2">
                   <label
                     className="absolute -top-1 left-2 text-[18px] bg-white px-4"
@@ -137,6 +207,13 @@ const AuthPage = () => {
                   <div className="flex items-center gap-2 border outline-none px-4 rounded-[8px] focus:border focus:border-blue-600">
                     <input
                       type={eye ? "text" : "password"}
+                      value={registerdata.password}
+                      onChange={(e) =>
+                        setRegister({
+                          ...registerdata,
+                          password: e.target.value,
+                        })
+                      }
                       className="w-full py-3 outline-none text-[18px]"
                     />
                     <span
@@ -147,18 +224,6 @@ const AuthPage = () => {
                     </span>
                   </div>
                 </div>
-                <div className="relative py-2">
-                  <label
-                    className="absolute -top-1 left-2 text-[18px] bg-white px-4"
-                    htmlFor="confirm-password"
-                  >
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    className="w-full border outline-none py-3 px-4 rounded-[8px] focus:border focus:border-blue-600 text-[18px]"
-                  />
-                </div>
 
                 <div className="text-center py-2">
                   <p className="text-gray-500 text-sm mt-1">
@@ -168,12 +233,20 @@ const AuthPage = () => {
                       className="text-blue-600 font-semibold cursor-pointer"
                     >
                       Log in here
+                    </span>{" "}
+                    <span>/</span>{" "}
+                    <span className="text-blue-600 font-semibold cursor-pointer">
+                      Verify account
                     </span>
                   </p>
                 </div>
 
-                <button className="rounded-[10px] bg-blue-600 text-white font-semibold text-[20px] w-full py-3 mt-4">
-                  Sign Up
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`${loading ? "opacity-50" : "opacity-100"}rounded-[10px] bg-blue-600 text-white font-semibold text-[20px] w-full py-3 mt-4`}
+                >
+                  {loading ? "Signing...." : "  Sign Up"}
                 </button>
               </form>
             </div>

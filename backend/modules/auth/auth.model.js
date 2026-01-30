@@ -46,6 +46,16 @@ const authSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isVender: {
+      type: Boolean,
+      default: false,
+    },
+    vendorId: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      default: null,
+    },
     twoFaSecret: { type: String, default: null },
   },
   { timestamps: true },
